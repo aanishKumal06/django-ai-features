@@ -62,11 +62,6 @@ source venv/bin/activate
 uv sync
 ```
 
-4. Configure environment
-```bash
-cp .env.example .env
-# Edit .env with your settings
-```
 
 4. Setup database
 ```bash
