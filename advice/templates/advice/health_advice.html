@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Health Recommendations</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .patient-info {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .patient-id {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .recommendation-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recommendation-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .activities-card::before {
+            background: linear-gradient(90deg, #00b894, #00a085);
+        }
+
+        .foods-to-eat-card::before {
+            background: linear-gradient(90deg, #fdcb6e, #e17055);
+        }
+
+        .foods-to-avoid-card::before {
+            background: linear-gradient(90deg, #e17055, #d63031);
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .activities-icon {
+            background: linear-gradient(45deg, #00b894, #00a085);
+        }
+
+        .foods-to-eat-icon {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+        }
+
+        .foods-to-avoid-icon {
+            background: linear-gradient(45deg, #e17055, #d63031);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .recommendation-list {
+            list-style: none;
+        }
+
+        .recommendation-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: #636e72;
+            line-height: 1.6;
+        }
+
+        .recommendation-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-icon {
+            color: #00b894;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .foods-to-avoid .item-icon {
+            color: #e17055;
+        }
+
+        .error-message {
+            background: rgba(231, 112, 85, 0.1);
+            border: 1px solid rgba(231, 112, 85, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+        }
+
+        .error-message i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-recommendations {
+            text-align: center;
+            padding: 40px 20px;
+            color: #636e72;
+        }
+
+        .empty-recommendations i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .recommendations-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .back-btn {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="{% url 'all_advice' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+
+        <div class="header">
+            <h1><i class="fas fa-robot"></i> AI Health Recommendations</h1>
+            <p>Personalized advice based on your health condition and medications</p>
+        </div>
+
+        <div class="patient-info">
+            <div class="patient-id">
+                <i class="fas fa-user"></i>
+                Patient #{{ patient_id }}
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error</h3>
+            <p>{{ error }}</p>
+        </div>
+        {% elif advice %}
+        <div class="recommendations-grid">
+            <!-- Activities Card -->
+            <div class="recommendation-card activities-card">
+                <div class="card-header">
+                    <div class="card-icon activities-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <div class="card-title">Recommended Activities</div>
+                </div>
+
+                {% if advice.recommended_activities %}
+                <ul class="recommendation-list">
+                    {% for activity in advice.recommended_activities %}
+                    <li class="recommendation-item">
+                        <i class="fas fa-check-circle item-icon"></i>
+                        <span>{{ activity }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-recommendations">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No specific activities recommended at this time.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Foods to Eat Card -->
+            <div class="recommendation-card foods-to-eat-card">
+                <div class="card-header">
+                    <div class="card-icon foods-to-eat-icon">
+                        <i class="fas fa-apple-alt"></i>
+                    </div>
+                    <div class="card-title">Foods to Include</div>
+                </div>
+
+                {% if advice.foods_to_eat %}
+                <ul class="recommendation-list">
+                    {% for food in advice.foods_to_eat %}
+                    <li class="recommendation-item">
+                        <i class="fas fa-check-circle item-icon"></i>
+                        <span>{{ food }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-recommendations">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No specific foods recommended at this time.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Foods to Avoid Card -->
+            <div class="recommendation-card foods-to-avoid-card">
+                <div class="card-header">
+                    <div class="card-icon foods-to-avoid-icon">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <div class="card-title">Foods to Avoid</div>
+                </div>
+
+                {% if advice.foods_to_avoid %}
+                <ul class="recommendation-list foods-to-avoid">
+                    {% for food in advice.foods_to_avoid %}
+                    <li class="recommendation-item">
+                        <i class="fas fa-times-circle item-icon"></i>
+                        <span>{{ food }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-recommendations">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No specific foods to avoid at this time.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="loading">
+            <i class="fas fa-spinner"></i>
+            <h3>Generating AI Recommendations...</h3>
+            <p>Please wait while we analyze your health data and create personalized advice.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Add smooth scrolling and animations
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.recommendation-card');
+
+            // Add staggered animation to cards
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+
+</html>
